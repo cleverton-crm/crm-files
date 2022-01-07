@@ -10,10 +10,10 @@ async function bootstrap() {
   const logger = new Logger('FilesModule');
 
   const config = new ConfigService();
-  const apps = await NestFactory.create(FileModule);
+  const api = await NestFactory.create(FileModule);
 
   // apps.use(helmet());
-  apps.enableCors();
+  api.enableCors();
 
   const app = await NestFactory.createMicroservice(FileModule, {
     transport: Transport.TCP,
@@ -27,8 +27,8 @@ async function bootstrap() {
     cyan(`Files microservice started on TCP port: ${config.get('port')}`),
   );
   await app.listen();
-  await apps.listen(config.get('port'), () => {
-    logger.log(cyan(`Started listening on port ${config.get('port')}`));
+  await api.listen(config.get('api'), () => {
+    logger.log(cyan(`Started listening on port ${config.get('api')}`));
     if (typeof process.send === 'function') {
       process.send('ready');
     }
