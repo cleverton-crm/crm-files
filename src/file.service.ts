@@ -4,6 +4,7 @@ import { Connection } from 'mongoose';
 import { Core } from 'crm-core';
 import { GridFSPromise } from 'gridfs-promise';
 import { Profile } from './schemas/profile.schema';
+import { extname } from 'path';
 
 @Injectable()
 export class FileService {
@@ -46,19 +47,23 @@ export class FileService {
 
     const avatar = await this.gridfs.getFile(
       profile.avatar.get('id'),
-      profile.avatar.get('filename'),
+      profile.id,
     );
-    return Core.ResponseDataAsync('show avatar', avatar);
+    const response =
+      'https://fmedia.cleverton.ru/' + profile.id + extname(avatar);
+
+    return Core.ResponseDataAsync('show avatar', response);
   }
-
-
-
 
   private async uploadAvatarString(data: any, profile: Profile) {
     data.files.forEach((bulkFiles) => {
       const img = Buffer.from(bulkFiles.buffer.data).toString('base64');
       this.gridfs
         .uploadFileString(img, bulkFiles.originalname, bulkFiles.mimetype, {
+          url:
+            'https://fmedia.cleverton.ru/' +
+            profile.id +
+            extname(bulkFiles.originalname),
           filename: bulkFiles.originalname,
           mimetype: bulkFiles.mimetype,
           size: bulkFiles.size,

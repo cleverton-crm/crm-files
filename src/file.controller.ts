@@ -8,12 +8,12 @@ export class FileController {
   constructor(private readonly profileService: FileService) {}
 
 
-  @MessagePattern('file:avatar')
+  @MessagePattern('files:avatar')
   async uploadAvatar(@Payload() data: any): Promise<any> {
     return await this.profileService.uploadAvatarFile(data);
   }
 
-  @MessagePattern('file:avatar:show')
+  @MessagePattern('files:avatar:show')
   async showAvatar(@Payload() data: any): Promise<any> {
     return await this.profileService.showAvatar(data);
   }
