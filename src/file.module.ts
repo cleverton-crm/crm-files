@@ -7,7 +7,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ProfileProvider } from './schemas/profile.provider';
 import { JwtConfigService } from './providers/jwt.servises';
 import { MongoConfigService } from './providers/mongo.service';
-import { UserProvider } from './schemas/user.provider';
 import { GridFsMulterConfigService } from './config/multer-config.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { GridFSPromise } from 'gridfs-promise';
@@ -34,7 +33,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     MongooseModule.forRootAsync({
       useClass: MongoConfigService,
     }),
-    MongooseModule.forFeatureAsync([ProfileProvider, UserProvider]),
+    MongooseModule.forFeatureAsync([ProfileProvider]),
   ],
   controllers: [FileController],
   providers: [

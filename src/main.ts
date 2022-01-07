@@ -7,7 +7,7 @@ import { ConfigService } from './config/config.service';
 import * as helmet from 'helmet';
 
 async function bootstrap() {
-  const logger = new Logger('ProfileModule');
+  const logger = new Logger('FilesModule');
 
   const config = new ConfigService();
   const apps = await NestFactory.create(FileModule);
@@ -24,7 +24,7 @@ async function bootstrap() {
   } as TcpOptions);
 
   logger.log(
-    cyan(`Profile microservice started on TCP port: ${config.get('port')}`),
+    cyan(`Files microservice started on TCP port: ${config.get('port')}`),
   );
   await app.listen();
   await apps.listen(config.get('port'), () => {
