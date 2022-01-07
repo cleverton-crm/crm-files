@@ -7,7 +7,7 @@ module.exports = {
       wait_ready: true,
       stop_exit_codes: [0],
       env: {
-        PORT: 5020,
+        PORT: 5021,
       },
       env_production: {
         NODE_ENV: 'production',
