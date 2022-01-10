@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { FileController } from './file.controller';
-import { FileService } from './file.service';
+import { FileController } from './controllers/file.controller';
+import { FileService } from './services/file.service';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ProfileProvider } from './schemas/profile.provider';
+import { ProfileProvider } from './providers/profile.provider';
 import { JwtConfigService } from './providers/jwt.servises';
 import { MongoConfigService } from './providers/mongo.service';
 import { GridFsMulterConfigService } from './config/multer-config.service';
@@ -13,6 +13,8 @@ import { ConfigService } from './config/config.service';
 import * as path from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { GridFSData } from './helpers/gridfs-data';
+import { CompanyProviderSchema } from './providers/company.provider';
+import { ClientsProviderSchema } from './providers/client.provider';
 
 @Module({
   imports: [
@@ -33,7 +35,11 @@ import { GridFSData } from './helpers/gridfs-data';
     MongooseModule.forRootAsync({
       useClass: MongoConfigService,
     }),
-    MongooseModule.forFeatureAsync([ProfileProvider]),
+    MongooseModule.forFeatureAsync([
+      ProfileProvider,
+      CompanyProviderSchema,
+      ClientsProviderSchema,
+    ]),
   ],
   controllers: [FileController],
   providers: [

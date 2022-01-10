@@ -1,4 +1,4 @@
-import { ProfileSchema } from './profile.schema';
+import { ProfileSchema } from '../schemas/profile.schema';
 
 export const ProfileProvider = {
   name: 'Profile',

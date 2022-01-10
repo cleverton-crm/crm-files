@@ -3,13 +3,14 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { Core } from 'crm-core';
 
-import { Profile } from './schemas/profile.schema';
+import { Profile } from '../schemas/profile.schema';
 import { extname } from 'path';
-import { GridFSData } from './helpers/gridfs-data';
+import { GridFSData } from '../helpers/gridfs-data';
 
 @Injectable()
 export class FileService {
   private readonly profileModel;
+  private readonly clientModel;
   private readonly userModel;
 
   constructor(
@@ -17,6 +18,7 @@ export class FileService {
     private gridfs: GridFSData,
   ) {
     this.profileModel = this.connection.model('Profile');
+    this.clientModel = this.connection.model('Clients');
   }
 
   /**
@@ -88,5 +90,43 @@ export class FileService {
         .catch((reason) => console.log());
       return profile.avatar;
     });
+  }
+
+  async documentsClientsUpload(data: {
+    client: string;
+    files: any;
+    bucketName: string;
+  }) {
+    let clientData = await this.clientModel
+      .findOne({ _id: data.client })
+      .exec();
+    const respo = data.files.forEach((files) => {
+      const file = Buffer.from(files.buffer.data).toString('base64');
+      this.gridfs
+        .uploadFileString(
+          file,
+          files.originalname,
+          files.mimetype,
+          {
+            filename: files.originalname,
+            mimetype: files.mimetype,
+            size: files.size,
+          },
+          data.bucketName,
+        )
+        .then(async (resultFile) => {
+          for (const [k, v] of Object.entries(
+            JSON.parse(JSON.stringify(resultFile)),
+          )) {
+            if (k === '_id') {
+              clientData.attachments.set('id', v);
+            }
+          }
+          await clientData.save();
+        })
+        .catch((reason) => console.log());
+      return clientData.attachments;
+    });
+    return Core.ResponseDataAsync('add attachment file', respo);
   }
 }

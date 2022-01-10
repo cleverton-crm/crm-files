@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { FileService } from './file.service';
+import { FileService } from '../services/file.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Core } from 'crm-core';
 
@@ -20,5 +20,10 @@ export class FileController {
   @MessagePattern('files:avatar:show')
   async showAvatar(@Payload() data: any): Promise<any> {
     return await this.profileService.showAvatar(data);
+  }
+
+  @MessagePattern('files:clients:upload')
+  async uploadClientsDocuments(@Payload() data: any): Promise<any> {
+    return await this.profileService.documentsClientsUpload(data);
   }
 }
