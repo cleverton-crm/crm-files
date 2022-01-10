@@ -2,9 +2,10 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { Core } from 'crm-core';
-import { GridFSPromise } from 'gridfs-promise';
+
 import { Profile } from './schemas/profile.schema';
 import { extname } from 'path';
+import { GridFSData } from './helpers/gridfs-data';
 
 @Injectable()
 export class FileService {
@@ -13,7 +14,7 @@ export class FileService {
 
   constructor(
     @InjectConnection() private readonly connection: Connection,
-    private gridfs: GridFSPromise,
+    private gridfs: GridFSData,
   ) {
     this.profileModel = this.connection.model('Profile');
   }
@@ -42,7 +43,6 @@ export class FileService {
   }
 
   async showAvatar(data: any) {
-    let result;
     const profile = await this.profileModel.findOne({ _id: data.id }).exec();
 
     const avatar = await this.gridfs.getFile(
@@ -55,6 +55,11 @@ export class FileService {
     return Core.ResponseDataAsync('show avatar', response);
   }
 
+  async list() {
+    const avatars = await this.gridfs.getFileList();
+    return Core.ResponseDataAsync('show list files', avatars);
+  }
+
   private async uploadAvatarString(data: any, profile: Profile) {
     data.files.forEach((bulkFiles) => {
       const img = Buffer.from(bulkFiles.buffer.data).toString('base64');
@@ -64,6 +69,7 @@ export class FileService {
             'https://fmedia.cleverton.ru/' +
             profile.id +
             extname(bulkFiles.originalname),
+          owner: profile.id,
           filename: bulkFiles.originalname,
           mimetype: bulkFiles.mimetype,
           size: bulkFiles.size,

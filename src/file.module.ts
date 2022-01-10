@@ -9,10 +9,10 @@ import { JwtConfigService } from './providers/jwt.servises';
 import { MongoConfigService } from './providers/mongo.service';
 import { GridFsMulterConfigService } from './config/multer-config.service';
 import { MulterModule } from '@nestjs/platform-express';
-import { GridFSPromise } from 'gridfs-promise';
 import { ConfigService } from './config/config.service';
 import * as path from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { GridFSData } from './helpers/gridfs-data';
 
 @Module({
   imports: [
@@ -41,9 +41,9 @@ import { ServeStaticModule } from '@nestjs/serve-static';
     FileService,
     ConfigService,
     {
-      provide: GridFSPromise,
+      provide: GridFSData,
       useFactory: async (configService: ConfigService) => {
-        return new GridFSPromise(
+        return new GridFSData(
           configService.get('base'),
           configService.getUrlMongo(),
           {},

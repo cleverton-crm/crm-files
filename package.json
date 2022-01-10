@@ -1,6 +1,6 @@
 {
   "name": "crm-files",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Files structure",
   "author": "",
   "private": true,
@@ -41,7 +41,6 @@
     "crm-core": "https://github.com/cleverton-crm/crm-core.git",
     "cross-env": "^7.0.3",
     "env-url": "^0.0.3",
-    "gridfs-promise": "^6.3.7",
     "helmet": "^5.0.1",
     "husky": "^7.0.4",
     "mongo-gridfs": "^1.1.0",
