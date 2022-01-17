@@ -15,6 +15,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { GridFSData } from './helpers/gridfs-data';
 import { CompanyProviderSchema } from './providers/company.provider';
 import { ClientsProviderSchema } from './providers/client.provider';
+import { NewsProviderSchema } from './providers/news.provider';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ClientsProviderSchema } from './providers/client.provider';
       ProfileProvider,
       CompanyProviderSchema,
       ClientsProviderSchema,
+      NewsProviderSchema
     ]),
   ],
   controllers: [FileController],
