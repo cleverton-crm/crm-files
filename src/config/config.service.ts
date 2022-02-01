@@ -5,6 +5,7 @@ export class ConfigService {
 
   constructor() {
     this.config = {
+      url: 'https://fmedia.cleverton.ru/',
       api: process.env.FILES_PORT,
       port: process.env.FILES_SERVICE_PORT,
       jwt_secret: process.env.JWT_SECRET || 'i_dont_not_use_secret_key',

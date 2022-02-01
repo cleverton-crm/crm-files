@@ -50,6 +50,7 @@
     "mongoose-paginate-v2": "^1.4.2",
     "mongoose-uuid2": "^2.3.0",
     "multer-gridfs-storage": "^5.0.2",
+    "redis": "^4.0.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",

@@ -354,7 +354,7 @@ export class GridFSData {
             bucketName: bucketData || this.bucketName,
           });
 
-          const binary = new Buffer(uploadData, 'base64');
+          const binary = Buffer.from(uploadData, 'base64');
           const readable = Readable.from(binary);
 
           readable

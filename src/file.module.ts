@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { FileController } from './controllers/file.controller';
-import { FileService } from './services/file.service';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -16,6 +14,8 @@ import { GridFSData } from './helpers/gridfs-data';
 import { CompanyProviderSchema } from './providers/company.provider';
 import { ClientsProviderSchema } from './providers/client.provider';
 import { NewsProviderSchema } from './providers/news.provider';
+import { ClientService, NewsService, ProfileService } from './services';
+import { ClientController, NewsController, ProfileController } from './controllers';
 
 @Module({
   imports: [
@@ -43,10 +43,12 @@ import { NewsProviderSchema } from './providers/news.provider';
       NewsProviderSchema
     ]),
   ],
-  controllers: [FileController],
+  controllers: [ClientController,ProfileController,NewsController],
   providers: [
     GridFsMulterConfigService,
-    FileService,
+    ClientService,
+    ProfileService,
+    NewsService,
     ConfigService,
     {
       provide: GridFSData,
