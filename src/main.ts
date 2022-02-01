@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { FileModule } from './file.module';
 import { TcpOptions, Transport } from '@nestjs/microservices';
 import { cyan } from 'cli-color';
-import { Logger } from '@nestjs/common';
+import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from './config/config.service';
 import * as helmet from 'helmet';
 
@@ -35,3 +35,24 @@ async function bootstrap() {
   });
 }
 bootstrap();
+
+let app: INestApplication;
+const logger = new Logger('NestApplication');
+
+async function gracefulShutdown(): Promise<void> {
+  if (app !== undefined) {
+    await app.close();
+    logger.warn('Application closed!');
+  }
+  process.exit(0);
+}
+
+process.once('SIGTERM', async () => {
+  logger.error('SIGTERM: Graceful shutdown... ');
+  await gracefulShutdown();
+});
+
+process.once('SIGINT', async () => {
+  logger.error('SIGINT: Graceful shutdown... ');
+  await gracefulShutdown();
+});
