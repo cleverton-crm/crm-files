@@ -92,6 +92,7 @@ export class ClientService {
   }
 
 
+
   async downloadFiles(data: {id: string, file: string, owner:any }) {
 
     const file = await this.gridfs.getFileOne(data.file,'client_' + data.id,data.id)
