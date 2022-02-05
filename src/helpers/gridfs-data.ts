@@ -252,7 +252,7 @@ export class GridFSData {
                   if (this.closeConnectionAutomatically) {
                     await client.close();
                   }
-                  resolve(`${this.basePath}/${filePath}${fileName}`);
+                  resolve(`${fileName}` );
                 })
                 .pipe(
                   fs.createWriteStream(

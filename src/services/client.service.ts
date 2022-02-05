@@ -86,16 +86,19 @@ export class ClientService {
 
   async listFiles( data: {id: string, owner:any }) {
     const bucket = 'client_'+ data.id
-    console.log(bucket);
+
     const result = Core.ResponseDataAsync('add attachment file', await this.gridfs.getFileList(bucket));
     return result
   }
 
 
   async downloadFiles(data: {id: string, file: string, owner:any }) {
-    console.log(data);
+
     const file = await this.gridfs.getFileOne(data.file,'client_' + data.id,data.id)
-    const result = Core.ResponseDataAsync('add attachment file', file);
+    console.log(file);
+    const url = this.configService.get('url') +  data.id + `/` + file
+
+    const result = Core.ResponseDataAsync('add attachment file', url);
     return result
   }
 }
