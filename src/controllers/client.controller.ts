@@ -9,8 +9,18 @@ export class ClientController {
 
 
   @MessagePattern('files:clients:upload')
-  async uploadClientsDocuments(@Payload() data: any): Promise<any> {
-    return await this.clientService.documentsClientsUpload(data);
+  async uploadFiles(@Payload() data: any): Promise<any> {
+    return await this.clientService.upload(data);
+  }
+
+  @MessagePattern('files:clients:list')
+  async listFiles(@Payload() data: any): Promise<any> {
+    return await this.clientService.listFiles(data);
+  }
+
+  @MessagePattern('files:clients:download')
+  async downloadFiles(@Payload() data: any): Promise<any> {
+    return await this.clientService.downloadFiles(data);
   }
 
 }

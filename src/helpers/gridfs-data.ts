@@ -9,6 +9,7 @@ import {
 } from 'mongodb';
 import * as path from 'path';
 import { Readable } from 'stream';
+import { mkdirSync } from 'fs';
 
 export interface IGridFSObject {
   _id: ObjectID;
@@ -141,7 +142,7 @@ export class GridFSData {
           });
 
           return bucket
-            .find({ _id: new ObjectID(id) }, { maxTimeMS: this.maxTimeMS })
+            .find({ '$or' :[ {_id: new ObjectID(id)},{name: fileName }] }, { maxTimeMS: this.maxTimeMS })
             .toArray()
             .then(async (result) => {
               if (!result || result.length === 0) {
@@ -194,6 +195,149 @@ export class GridFSData {
         });
     });
   }
+
+  public getFileOne(
+    id: string,
+
+    bucketData: string = 'fs',
+    filePath?: string,
+    fileName?: string,
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.connectDB()
+        .then((client) => {
+          const connection = client.db(this.databaseName);
+          const bucket = new GridFSBucket(connection, {
+            bucketName: bucketData || this.bucketName,
+          });
+
+          return bucket
+            .find({  _id: new ObjectID(id) }, { maxTimeMS: this.maxTimeMS })
+            .toArray()
+            .then(async (result) => {
+              if (!result || result.length === 0) {
+                throw new Error('Object not found');
+              }
+
+              if (!fileName) {
+                fileName = result[0].filename;
+              } else {
+                if (path.extname(fileName) === '') {
+                  fileName = fileName.concat(path.extname(result[0].filename));
+                }
+              }
+
+              if (!filePath) {
+                filePath = '';
+              }
+
+              if (this.basePath.charAt(this.basePath.length - 1) !== '/') {
+                filePath += '/';
+              }
+              const fullPath = `${this.basePath}/${filePath}`
+              if (!fs.existsSync(`${this.basePath}/${filePath}`)) {
+
+                throw new Error('Path not found');
+              }
+
+              bucket
+                .openDownloadStream(new ObjectID(id))
+                .once('error', async (error) => {
+                  if (this.closeConnectionAutomatically) {
+                    await client.close();
+                  }
+                  reject(error);
+                })
+                .once('end', async () => {
+                  if (this.closeConnectionAutomatically) {
+                    await client.close();
+                  }
+                  resolve(`${this.basePath}/${filePath}${fileName}`);
+                })
+                .pipe(
+                  fs.createWriteStream(
+                    `${this.basePath}/${filePath}/${fileName}`,
+                  ),
+                );
+            });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
+
+
+  public getFileName(
+    fileName: string,
+    filePath?: string,
+    id?: string,
+    bucketData: string = 'fs',
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.connectDB()
+        .then((client) => {
+          const connection = client.db(this.databaseName);
+          const bucket = new GridFSBucket(connection, {
+            bucketName: bucketData || this.bucketName,
+          });
+
+          return bucket
+            .find({ name: fileName  }, { maxTimeMS: this.maxTimeMS })
+            .toArray()
+            .then(async (result) => {
+              if (!result || result.length === 0) {
+                throw new Error('Object not found');
+              }
+
+              // if (!fileName) {
+              //   fileName = result[0].filename;
+              // } else {
+              //   if (path.extname(fileName) === '') {
+              //     fileName = fileName.concat(path.extname(result[0].filename));
+              //   }
+              // }
+
+              if (!filePath) {
+                filePath = '';
+              }
+
+              if (this.basePath.charAt(this.basePath.length - 1) !== '/') {
+                filePath += '/';
+              }
+
+              if (!fs.existsSync(`${this.basePath}${filePath}`)) {
+                throw new Error('Path not found');
+              }
+
+              bucket
+                .openDownloadStream(new ObjectID(id))
+                .once('error', async (error) => {
+                  if (this.closeConnectionAutomatically) {
+                    await client.close();
+                  }
+                  reject(error);
+                })
+                .once('end', async () => {
+                  if (this.closeConnectionAutomatically) {
+                    await client.close();
+                  }
+                  resolve(`${this.basePath}${filePath}${fileName}`);
+                })
+                .pipe(
+                  fs.createWriteStream(
+                    `${this.basePath}${filePath}${fileName}`,
+                  ),
+                );
+            });
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  }
+
 
   /**
    * Get a single Object

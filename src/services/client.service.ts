@@ -1,23 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { Core } from 'crm-core';
 import { GridFSData } from '../helpers/gridfs-data';
+import { extname } from 'path';
+import { ConfigService } from 'src/config/config.service';
 
 @Injectable()
 export class ClientService {
-
+  private logger: Logger
   private readonly clientModel;
 
   constructor(
     @InjectConnection() private readonly connection: Connection,
     private gridfs: GridFSData,
+    private configService: ConfigService
   ) {
     this.clientModel = this.connection.model('Clients');
-
+    this.logger = new Logger(ClientService.name);
   }
 
-  async documentsClientsUpload(data: {
+  async upload(data: {
     owner: string;
     client: string;
     files: any;
@@ -31,7 +34,8 @@ export class ClientService {
         throw new NotFoundException('Не найден такой контакт (клиент)');
       }
       uploaded = data.files.forEach((files) => {
-        const file = Buffer.alloc(files.buffer.data).toString('base64');
+        const file = Buffer.from(files.buffer.data).toString('base64');
+        //const picture = await this.gridfs.getFileName();
         this.gridfs
           .uploadFileString(
             file,
@@ -44,18 +48,30 @@ export class ClientService {
               filename: files.originalname,
               mimetype: files.mimetype,
               size: files.size,
+              url:'',
+              ext: extname(files.originalname)
             },
             data.bucketName,
           )
           .then(async (resultFile) => {
+            let extFileName
             for (const [k, v] of Object.entries(
               JSON.parse(JSON.stringify(resultFile)),
             )) {
+
+
               if (k === '_id') {
-                clientData.attachments.set('id', v);
+               let fill = await this.gridfs.getFileOne(`${v}`,'client_' + clientData.id,clientData.id,resultFile.metadata.filename)
+                resultFile.metadata.url = this.configService.get('url') +  clientData.id + '/' + resultFile.metadata.filename;
+                clientData.attachments === null
+                  ? clientData.attachments = {[`${v}`]: resultFile.metadata}
+                  : clientData.attachments.set(v, resultFile.metadata);
+
               }
             }
             await clientData.save();
+
+
           })
           .catch((reason) => console.log());
         return clientData.attachments;
@@ -66,5 +82,20 @@ export class ClientService {
     }
 
     return resultFile;
+  }
+
+  async listFiles( data: {id: string, owner:any }) {
+    const bucket = 'client_'+ data.id
+    console.log(bucket);
+    const result = Core.ResponseDataAsync('add attachment file', await this.gridfs.getFileList(bucket));
+    return result
+  }
+
+
+  async downloadFiles(data: {id: string, file: string, owner:any }) {
+    console.log(data);
+    const file = await this.gridfs.getFileOne(data.file,'client_' + data.id,data.id)
+    const result = Core.ResponseDataAsync('add attachment file', file);
+    return result
   }
 }
