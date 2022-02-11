@@ -22,6 +22,9 @@ export class Clients extends Document {
 
   @Prop({ type: Boolean, default: true })
   active: boolean;
+
+  @Prop({ type: Map, default: {} })
+  avatar: Map<string, any>;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Clients);

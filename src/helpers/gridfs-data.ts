@@ -1,15 +1,10 @@
 import { ObjectID, UUID } from 'bson';
 import * as fs from 'fs';
-import {
-  Document,
-  GridFSBucket,
-  GridFSBucketReadStream,
-  MongoClient,
-  MongoClientOptions,
-} from 'mongodb';
+import { Document, GridFSBucket, GridFSBucketReadStream, MongoClient, MongoClientOptions } from 'mongodb';
 import * as path from 'path';
 import { Readable } from 'stream';
 import { mkdirSync } from 'fs';
+import { NotFoundException } from '@nestjs/common';
 
 export interface IGridFSObject {
   _id: ObjectID;
@@ -86,10 +81,7 @@ export class GridFSData {
    * @param bucketData
    * @return {Promise<GridFSBucketReadStream>}
    */
-  public getFileStream(
-    id: string,
-    bucketData: string = 'fs',
-  ): Promise<GridFSBucketReadStream> {
+  public getFileStream(id: string, bucketData: string = 'fs'): Promise<GridFSBucketReadStream> {
     return new Promise<GridFSBucketReadStream>((resolve, reject) => {
       this.connectDB()
         .then((client) => {
@@ -127,12 +119,7 @@ export class GridFSData {
    * @param bucketData
    * @return {Promise<string>}
    */
-  public getFile(
-    id: string,
-    fileName?: string,
-    filePath?: string,
-    bucketData: string = 'fs',
-  ): Promise<string> {
+  public getFile(id: string, bucketData: string = 'fs', filePath?: string, fileName?: string): Promise<string> {
     return new Promise((resolve, reject) => {
       this.connectDB()
         .then((client) => {
@@ -142,7 +129,7 @@ export class GridFSData {
           });
 
           return bucket
-            .find({ '$or' :[ {_id: new ObjectID(id)},{name: fileName }] }, { maxTimeMS: this.maxTimeMS })
+            .find({ $or: [{ _id: new ObjectID(id) }, { name: fileName }] }, { maxTimeMS: this.maxTimeMS })
             .toArray()
             .then(async (result) => {
               if (!result || result.length === 0) {
@@ -165,8 +152,10 @@ export class GridFSData {
                 filePath += '/';
               }
 
-              if (!fs.existsSync(`${this.basePath}${filePath}`)) {
-                throw new Error('Path not found');
+              let fullPath = `${this.basePath}/${filePath}`;
+
+              if (!fs.existsSync(`${fullPath}`)) {
+                mkdirSync(fullPath);
               }
 
               bucket
@@ -181,13 +170,9 @@ export class GridFSData {
                   if (this.closeConnectionAutomatically) {
                     await client.close();
                   }
-                  resolve(`${this.basePath}${filePath}${fileName}`);
+                  resolve(`${fileName}`);
                 })
-                .pipe(
-                  fs.createWriteStream(
-                    `${this.basePath}${filePath}${fileName}`,
-                  ),
-                );
+                .pipe(fs.createWriteStream(`${fullPath}${fileName}`));
             });
         })
         .catch((err) => {
@@ -198,9 +183,9 @@ export class GridFSData {
 
   public getFileOne(
     id: string,
-
     bucketData: string = 'fs',
     filePath?: string,
+    fileKind?: string,
     fileName?: string,
   ): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -212,7 +197,7 @@ export class GridFSData {
           });
 
           return bucket
-            .find({  _id: new ObjectID(id) }, { maxTimeMS: this.maxTimeMS })
+            .find({ _id: new ObjectID(id) }, { maxTimeMS: this.maxTimeMS })
             .toArray()
             .then(async (result) => {
               if (!result || result.length === 0) {
@@ -232,12 +217,13 @@ export class GridFSData {
               }
 
               if (this.basePath.charAt(this.basePath.length - 1) !== '/') {
-                filePath += '/';
+                filePath += `/`;
               }
-              const fullPath = `${this.basePath}/${filePath}`
-              if (!fs.existsSync(`${this.basePath}/${filePath}`)) {
 
-                throw new Error('Path not found');
+              let fullPath = `${this.basePath}/${filePath}`;
+
+              if (!fs.existsSync(`${fullPath}`)) {
+                mkdirSync(fullPath);
               }
 
               bucket
@@ -252,13 +238,9 @@ export class GridFSData {
                   if (this.closeConnectionAutomatically) {
                     await client.close();
                   }
-                  resolve(`${fileName}` );
+                  resolve(`${fileName}`);
                 })
-                .pipe(
-                  fs.createWriteStream(
-                    `${this.basePath}/${filePath}/${fileName}`,
-                  ),
-                );
+                .pipe(fs.createWriteStream(`${fullPath}${fileName}`));
             });
         })
         .catch((err) => {
@@ -267,14 +249,7 @@ export class GridFSData {
     });
   }
 
-
-
-  public getFileName(
-    fileName: string,
-    filePath?: string,
-    id?: string,
-    bucketData: string = 'fs',
-  ): Promise<string> {
+  public getFileName(fileName: string, filePath?: string, bucketData: string = 'fs', id?: string): Promise<string> {
     return new Promise((resolve, reject) => {
       this.connectDB()
         .then((client) => {
@@ -284,20 +259,20 @@ export class GridFSData {
           });
 
           return bucket
-            .find({ name: fileName  }, { maxTimeMS: this.maxTimeMS })
+            .find({ name: fileName }, { maxTimeMS: this.maxTimeMS })
             .toArray()
             .then(async (result) => {
               if (!result || result.length === 0) {
                 throw new Error('Object not found');
               }
 
-              // if (!fileName) {
-              //   fileName = result[0].filename;
-              // } else {
-              //   if (path.extname(fileName) === '') {
-              //     fileName = fileName.concat(path.extname(result[0].filename));
-              //   }
-              // }
+              if (!fileName) {
+                fileName = result[0].filename;
+              } else {
+                if (path.extname(fileName) === '') {
+                  fileName = fileName.concat(path.extname(result[0].filename));
+                }
+              }
 
               if (!filePath) {
                 filePath = '';
@@ -325,11 +300,7 @@ export class GridFSData {
                   }
                   resolve(`${this.basePath}${filePath}${fileName}`);
                 })
-                .pipe(
-                  fs.createWriteStream(
-                    `${this.basePath}${filePath}${fileName}`,
-                  ),
-                );
+                .pipe(fs.createWriteStream(`${this.basePath}${filePath}${fileName}`));
             });
         })
         .catch((err) => {
@@ -338,17 +309,13 @@ export class GridFSData {
     });
   }
 
-
   /**
    * Get a single Object
    * @param {string} id
    * @param bucketData
    * @return {Promise<IGridFSObject>}
    */
-  public getObject(
-    id: string,
-    bucketData: string = 'fs',
-  ): Promise<IGridFSObject | void> {
+  public getObject(id: string, bucketData: string = 'fs'): Promise<IGridFSObject | void> {
     return new Promise((resolve, reject) => {
       this.connectDB()
         .then((client) => {
@@ -364,11 +331,10 @@ export class GridFSData {
               if (this.closeConnectionAutomatically) {
                 await client.close();
               }
-
               if (result.length > 0) {
                 resolve(result[0]);
               } else {
-                reject(new Error('No Object found'));
+                reject(new NotFoundException('No Object found'));
               }
             });
         })
@@ -378,9 +344,7 @@ export class GridFSData {
     });
   }
 
-  public getFileList(
-    bucketData: string = 'fs',
-  ): Promise<IGridFSObject[] | void> {
+  public getFileList(bucketData: string = 'fs'): Promise<IGridFSObject[] | void> {
     return new Promise((resolve, reject) => {
       this.connectDB()
         .then((client) => {
@@ -489,6 +453,7 @@ export class GridFSData {
     type: string,
     meta: object,
     bucketData: string = 'fs',
+    realname: string[] = [],
   ): Promise<IGridFSObject> {
     return new Promise((resolve, reject) => {
       this.connectDB()
@@ -506,6 +471,7 @@ export class GridFSData {
               bucket.openUploadStream(targetFileName, {
                 contentType: type,
                 metadata: meta,
+                aliases: realname,
               }),
             )
             .on('error', async (err) => {
@@ -543,11 +509,11 @@ export class GridFSData {
             bucketName: bucketData || this.bucketName,
           });
 
-          bucket.delete(new ObjectID(id), async (err) => {
+          bucket.delete(new ObjectID(id), async (err, th) => {
             if (this.closeConnectionAutomatically) {
               await client.close();
             }
-
+            console.log(th);
             if (err) {
               reject(err);
             }
@@ -583,8 +549,6 @@ export class GridFSData {
       throw new Error('No Connection String given. Can´t connect to MongoDB.');
     }
 
-    return (this._ClientConnection = await MongoClient.connect(
-      this.connectionUrl,
-    ));
+    return (this._ClientConnection = await MongoClient.connect(this.connectionUrl));
   }
 }
