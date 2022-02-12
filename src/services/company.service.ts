@@ -4,10 +4,11 @@ import { Connection } from 'mongoose';
 import { GridFSData } from '../helpers/gridfs-data';
 import { ConfigService } from 'src/config/config.service';
 import { UploadDataService } from './upload.service';
+import { Companies } from '../schemas/company.schema';
 import { BaseUploadService } from './base-upload.service';
 
 @Injectable()
-export class ClientService extends BaseUploadService {
+export class CompanyService extends BaseUploadService {
   protected BUCKET_PATH = 'company_';
 
   constructor(
@@ -17,7 +18,7 @@ export class ClientService extends BaseUploadService {
     public uploadService: UploadDataService,
   ) {
     super(gridfs, configService, uploadService);
-    this.schemaModel = this.connection.model('Clients');
-    this.logger = new Logger(ClientService.name);
+    this.schemaModel = this.connection.model('Companies');
+    this.logger = new Logger(CompanyService.name);
   }
 }

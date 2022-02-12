@@ -16,6 +16,13 @@ import { ClientsProviderSchema } from './providers/client.provider';
 import { NewsProviderSchema } from './providers/news.provider';
 import { ClientService, NewsService, ProfileService } from './services';
 import { ClientController, NewsController, ProfileController } from './controllers';
+import { UploadDataService } from './services/upload.service';
+import { DealsProviderSchema } from './providers/deals.provider';
+import { CarsProviderSchema } from './providers/cars.provider';
+import { CompanyController } from './controllers/company.controller';
+import { CompanyService } from './services/company.service';
+import { CarsService } from './services/cars.service';
+import { DealsService } from './services/deals.service';
 
 @Module({
   imports: [
@@ -40,26 +47,26 @@ import { ClientController, NewsController, ProfileController } from './controlle
       ProfileProvider,
       CompanyProviderSchema,
       ClientsProviderSchema,
-      NewsProviderSchema
+      NewsProviderSchema,
+      DealsProviderSchema,
+      CarsProviderSchema,
     ]),
   ],
-  controllers: [ClientController,ProfileController,NewsController],
+  controllers: [ClientController, ProfileController, NewsController, CompanyController],
   providers: [
     GridFsMulterConfigService,
     ClientService,
     ProfileService,
     NewsService,
     ConfigService,
+    CompanyService,
+    CarsService,
+    DealsService,
+    UploadDataService,
     {
       provide: GridFSData,
       useFactory: async (configService: ConfigService) => {
-        return new GridFSData(
-          configService.get('base'),
-          configService.getUrlMongo(),
-          {},
-          'fs',
-          './upload',
-        );
+        return new GridFSData(configService.get('base'), configService.getUrlMongo(), {}, 'fs', './upload');
       },
       inject: [ConfigService],
     },

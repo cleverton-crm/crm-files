@@ -133,7 +133,7 @@ export class GridFSData {
             .toArray()
             .then(async (result) => {
               if (!result || result.length === 0) {
-                throw new Error('Object not found');
+                reject(new NotFoundException('Не правильно указан ID файла'));
               }
 
               if (!fileName) {
@@ -201,7 +201,7 @@ export class GridFSData {
             .toArray()
             .then(async (result) => {
               if (!result || result.length === 0) {
-                throw new Error('Object not found');
+                reject(new NotFoundException('Нет файла с указанным ID'));
               }
 
               if (!fileName) {
@@ -323,20 +323,23 @@ export class GridFSData {
           const bucket = new GridFSBucket(connection, {
             bucketName: bucketData || this.bucketName,
           });
-
-          bucket
-            .find({ _id: new ObjectID(id) }, { maxTimeMS: this.maxTimeMS })
-            .toArray()
-            .then(async (result: IGridFSObject[]) => {
-              if (this.closeConnectionAutomatically) {
-                await client.close();
-              }
-              if (result.length > 0) {
-                resolve(result[0]);
-              } else {
-                reject(new NotFoundException('No Object found'));
-              }
-            });
+          try {
+            bucket
+              .find({ _id: new ObjectID(id) }, { maxTimeMS: this.maxTimeMS })
+              .toArray()
+              .then(async (result: IGridFSObject[]) => {
+                if (this.closeConnectionAutomatically) {
+                  await client.close();
+                }
+                if (result.length > 0) {
+                  resolve(result[0]);
+                } else {
+                  reject(new NotFoundException('Файла с таким ID не найден.'));
+                }
+              });
+          } catch (e) {
+            reject(new NotFoundException('Не правильно указан ID файла'));
+          }
         })
         .catch((err) => {
           reject(err);
@@ -364,7 +367,7 @@ export class GridFSData {
               if (result.length > 0) {
                 resolve(result);
               } else {
-                reject(new Error('No Object found'));
+                reject(new NotFoundException('Файлы не найдены'));
               }
             });
         })
@@ -500,7 +503,7 @@ export class GridFSData {
    * @param {string} id
    * @return {Promise<boolean>}
    */
-  public delete(id: string, bucketData: string = 'fs'): Promise<boolean> {
+  public delete(id: string, bucketData: string = 'fs', filePath?: string): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       this.connectDB()
         .then((client) => {
@@ -513,10 +516,24 @@ export class GridFSData {
             if (this.closeConnectionAutomatically) {
               await client.close();
             }
-            console.log(th);
+
             if (err) {
               reject(err);
             }
+
+            if (this.basePath.charAt(this.basePath.length - 1) !== '/') {
+              filePath += '/';
+            }
+
+            if (filePath) {
+              if (this.basePath.charAt(this.basePath.length - 1) !== '/') {
+                filePath += '/';
+              }
+              const fullPath = `${this.basePath}${filePath}`;
+              console.log(fullPath);
+              //fs.unlinkSync(fullPath);
+            }
+
             resolve(true);
           });
         })

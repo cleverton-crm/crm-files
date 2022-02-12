@@ -7,8 +7,8 @@ import { UploadDataService } from './upload.service';
 import { BaseUploadService } from './base-upload.service';
 
 @Injectable()
-export class ClientService extends BaseUploadService {
-  protected BUCKET_PATH = 'company_';
+export class LeadsService extends BaseUploadService {
+  protected BUCKET_PATH = 'leads_';
 
   constructor(
     @InjectConnection() protected connection: Connection,
@@ -17,7 +17,7 @@ export class ClientService extends BaseUploadService {
     public uploadService: UploadDataService,
   ) {
     super(gridfs, configService, uploadService);
-    this.schemaModel = this.connection.model('Clients');
-    this.logger = new Logger(ClientService.name);
+    this.schemaModel = this.connection.model('Deals');
+    this.logger = new Logger(LeadsService.name);
   }
 }
