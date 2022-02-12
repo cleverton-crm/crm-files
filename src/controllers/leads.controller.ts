@@ -3,7 +3,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { LeadsService } from '../services/leads.service';
 
 @Controller()
-export class DealsController {
+export class LeadsController {
   constructor(private readonly leadsService: LeadsService) {}
 
   @MessagePattern('files:leads:upload')

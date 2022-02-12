@@ -23,6 +23,10 @@ import { CompanyController } from './controllers/company.controller';
 import { CompanyService } from './services/company.service';
 import { CarsService } from './services/cars.service';
 import { DealsService } from './services/deals.service';
+import { CarsController } from './controllers/cars.controller';
+import { LeadsService } from './services/leads.service';
+import { DealsController } from './controllers/deals.controller';
+import { LeadsController } from './controllers/leads.controller';
 
 @Module({
   imports: [
@@ -52,7 +56,15 @@ import { DealsService } from './services/deals.service';
       CarsProviderSchema,
     ]),
   ],
-  controllers: [ClientController, ProfileController, NewsController, CompanyController],
+  controllers: [
+    ClientController,
+    ProfileController,
+    NewsController,
+    CompanyController,
+    CarsController,
+    DealsController,
+    LeadsController,
+  ],
   providers: [
     GridFsMulterConfigService,
     ClientService,
@@ -62,6 +74,7 @@ import { DealsService } from './services/deals.service';
     CompanyService,
     CarsService,
     DealsService,
+    LeadsService,
     UploadDataService,
     {
       provide: GridFSData,
