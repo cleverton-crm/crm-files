@@ -4,13 +4,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 @Schema({ timestamps: true })
-export class Companies extends Document implements Core.Company.Schema{
+export class Companies extends Document implements Core.Company.Schema {
   @Prop({ type: uuidv4, default: uuidv4 })
   _id: string;
   @Prop({ type: String, default: null })
   name: string;
-  @Prop({ type: Boolean, default: 'active' })
+
+  @Prop({ type: Boolean, default: true })
   active: boolean;
+
   @Prop({ type: String, default: 'company' })
   object: string | 'company';
 
@@ -21,7 +23,7 @@ export class Companies extends Document implements Core.Company.Schema{
   ownership: string | Core.Company.Ownership;
 
   @Prop({ type: Map, default: null })
-  permissions: Map<string, any>
+  permissions: Map<string, any>;
 
   @Prop({ type: String, default: null })
   source: string;

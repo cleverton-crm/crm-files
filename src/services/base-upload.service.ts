@@ -12,11 +12,9 @@ export class BaseUploadService {
   private readonly CLIENT_AVATAR_PATH = '/avatar';
   private readonly CLIENT_DOCS_PATH = '/documents';
 
-  constructor(
-    public gridfs: GridFSData,
-    public configService: ConfigService,
-    public uploadService: UploadDataService,
-  ) {}
+  constructor(public gridfs: GridFSData, public configService: ConfigService, public uploadService: UploadDataService) {
+    this.logger = new Logger('UploadService');
+  }
 
   /**
    * Uploading data to the database and streaming the file to the upload folder
@@ -112,19 +110,13 @@ export class BaseUploadService {
    */
   async uploadAvatar(data: { owner: string; files: any; id: string }) {
     let result, resultUpload;
+    const schema = await this.schemaModel.findOne({ _id: data.id, active: true }).exec();
+
     try {
-      const schema = await this.schemaModel.findOne({ _id: data.id }).exec();
       if (!schema) {
-        throw new NotFoundException('Объект отсутвует в системе');
+        throw new NotFoundException('Объект отсутвует в системе или находится в архиве');
       } else {
         const clientFolder = this.BUCKET_PATH + schema.id;
-        if (!schema) {
-          return Core.ResponseError(
-            'Объект не обнаружен, что то пошло не так.',
-            HttpStatus.NOT_FOUND,
-            'Not Found Object',
-          );
-        }
         if (schema.avatar.get('id') === undefined) {
           result = await this.uploadService.uploadAvatar(data, schema, this.BUCKET_PATH);
         } else {
@@ -142,7 +134,8 @@ export class BaseUploadService {
         result = Core.ResponseData('Изображение загружено!', resultUpload);
       }
     } catch (e) {
-      result = Core.ResponseError(e.response.message, e.response.statusCode, e.response.error);
+      this.logger.error(e);
+      result = Core.ResponseError(e.message, e.statusCode, e.error);
     }
     return result;
   }

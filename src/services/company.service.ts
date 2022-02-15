@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
+import { Connection, Model } from 'mongoose';
 import { GridFSData } from '../helpers/gridfs-data';
 import { ConfigService } from 'src/config/config.service';
 import { UploadDataService } from './upload.service';
@@ -18,7 +18,7 @@ export class CompanyService extends BaseUploadService {
     public uploadService: UploadDataService,
   ) {
     super(gridfs, configService, uploadService);
-    this.schemaModel = this.connection.model('Companies');
+    this.schemaModel = this.connection.model('Companies') as Model<Companies>;
     this.logger = new Logger(CompanyService.name);
   }
 }
