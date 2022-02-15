@@ -26,12 +26,12 @@ export class ClientController {
     return await this.clientService.download(data);
   }
 
-  @MessagePattern('files:client:avatar:upload')
+  @MessagePattern('files:clients:avatar:upload')
   async uploadAvatarClient(@Payload() data: any): Promise<any> {
     return await this.clientService.uploadAvatar(data);
   }
 
-  @MessagePattern('files:client:avatar:show')
+  @MessagePattern('files:clients:avatar:show')
   async showAvatarClient(@Payload() data: any): Promise<any> {
     return await this.clientService.avatar(data);
   }
