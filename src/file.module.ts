@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ProfileProvider } from './providers/profile.provider';
 import { JwtConfigService } from './providers/jwt.servises';
-import { MongoConfigService } from './providers/mongo.service';
+import { MongoConfigService } from './config/mongo.service';
 import { GridFsMulterConfigService } from './config/multer-config.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { ConfigService } from './config/config.service';
