@@ -1,24 +1,38 @@
 import { Controller } from '@nestjs/common';
-import { ProfileService } from '../services/';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { ProfileService } from '../services';
 
 @Controller()
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @MessagePattern('files:list')
-  async list(@Payload() data: any): Promise<any> {
-    return await this.profileService.list();
+  @MessagePattern('files:profile:upload')
+  async uploadFilesClient(@Payload() data: any): Promise<any> {
+    return await this.profileService.upload(data);
   }
 
-  @MessagePattern('files:avatar')
-  async uploadAvatar(@Payload() data: any): Promise<any> {
-    return await this.profileService.uploadAvatarFile(data);
+  @MessagePattern('files:profile:list')
+  async listFilesClient(@Payload() data: any): Promise<any> {
+    return await this.profileService.listFiles(data);
   }
 
-  @MessagePattern('files:avatar:show')
-  async showAvatar(@Payload() data: any): Promise<any> {
-    return await this.profileService.showAvatar(data);
+  @MessagePattern('files:profile:delete')
+  async deleteFilesClient(@Payload() data: any): Promise<any> {
+    return await this.profileService.deleteFile(data);
   }
 
+  @MessagePattern('files:profile:download')
+  async downloadFilesClient(@Payload() data: any): Promise<any> {
+    return await this.profileService.download(data);
+  }
+
+  @MessagePattern('files:profile:avatar:upload')
+  async uploadAvatarClient(@Payload() data: any): Promise<any> {
+    return await this.profileService.uploadAvatar(data);
+  }
+
+  @MessagePattern('files:profile:avatar:show')
+  async showAvatarClient(@Payload() data: any): Promise<any> {
+    return await this.profileService.avatar(data);
+  }
 }
