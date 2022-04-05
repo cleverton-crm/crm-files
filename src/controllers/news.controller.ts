@@ -7,14 +7,13 @@ export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
 
-  @MessagePattern('files:news:picture:upload')
+  @MessagePattern('files:news:avatar:upload')
   async uploadNewsPicture(@Payload() data: any) {
-    console.log(data);
-    return await this.newsService.uploadNewsPicture(data);
+    return await this.newsService.uploadAvatar(data);
   }
 
-  @MessagePattern('files:news:picture:show')
+  @MessagePattern('files:news:avatar:show')
   async showNewsPicture(@Payload() data: any): Promise<any> {
-    return await this.newsService.showNewsPicture(data);
+    return await this.newsService.avatar(data);
   }
 }

@@ -111,7 +111,6 @@ export class BaseUploadService {
   async uploadAvatar(data: { owner: string; files: any; id: string }) {
     let result, resultUpload;
     const schema = await this.schemaModel.findOne({ _id: data.id, active: true }).exec();
-
     try {
       if (!schema) {
         throw new NotFoundException('Объект отсутвует в системе или находится в архиве');
@@ -149,7 +148,7 @@ export class BaseUploadService {
     try {
       const schema = await this.schemaModel.findOne({ _id: data.id }).exec();
       if (!schema) {
-        throw new NotFoundException('Нет такой клиента');
+        throw new NotFoundException('Нет такой записи');
       } else {
         const response = await this.uploadService.showAvatar(schema, this.BUCKET_PATH);
         result = Core.ResponseData('Ссылка на изображение', response);

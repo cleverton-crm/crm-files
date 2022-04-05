@@ -10,19 +10,24 @@ export class News extends Document {
   @Prop({ type: Boolean, default: true })
   active: boolean;
 
-  @Prop({ type: String, default: null })
-  author: string;
+  @Prop({ type: String, default: '' })
+  name: string;
+
+  @Prop({ type: String, default: '' })
+  owner: string;
+
+  @Prop({ type: String, default: 'news' })
+  object: string;
+
+  @Prop({ type: String, default: '' })
+  content: string;
 
   @Prop({ type: Map, default: {} })
   comments: Map<string, any>;
 
-  @Prop({ type: String, default: null })
-  content: string;
-
-  @Prop({ type: String, default: null })
-  name: string;
-
   @Prop({ type: Map, default: {} })
-  picture?: Map<string, any>;
+  avatar: Map<string, any>;
 }
+export type NewsModel<T extends Document> = PaginateModel<News>;
 export const NewsSchema = SchemaFactory.createForClass(News);
+export const NewsModel: NewsModel<News> = model<News>('News', NewsSchema) as NewsModel<News>;
